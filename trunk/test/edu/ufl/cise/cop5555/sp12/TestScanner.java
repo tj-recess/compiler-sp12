@@ -256,14 +256,12 @@ public class TestScanner {
 	@Test
 	public void testScan19() throws IllegalStringLiteralException {
 		String input = "true##+##+##false";
-		String expected = "true~+~EOF";
-		Kind[] expectedKinds = { BOOLEAN_LITERAL, PLUS, EOF };
+		String expected = "true~+~##false~EOF";
+		Kind[] expectedKinds = { BOOLEAN_LITERAL, PLUS, MALFORMED_COMMENT, EOF };
 		TokenStream stream = getInitializedTokenStream(input);
 		compareText(stream, expected);
 		compareKinds(stream, expectedKinds);
 	}
-	
-
 	
 	@Test
 	public void testErrorInput0() throws IllegalStringLiteralException {

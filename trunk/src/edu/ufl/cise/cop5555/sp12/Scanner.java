@@ -44,7 +44,7 @@ public class Scanner {
         SEPARATOR,
         OPERATOR,
         WHITE_SPACE,
-        COMMENT,
+        COMMENT_START,
         INTEGER_LITERAL,
         STRING_LITERAL,
         BOOLEAN_LITERAL,
@@ -56,7 +56,11 @@ public class Scanner {
         GOT_LESS_THAN,
         GOT_GREATER_THAN, 
         ILLEGAL_CHAR, 
-        GOT_NOT
+        GOT_NOT, 
+        GOT_HASH, 
+        GOT_HASH_INSIDE_COMMENT,
+        GOT_QUOTE, 
+        GOT_BACKSLASH
     }
 
 	public Scanner(TokenStream stream)  
@@ -201,6 +205,18 @@ public class Scanner {
                     t = stream.new Token(Kind.RIGHT_BRACE, beginOffset, index);
                     break;
                     
+                //comment
+                    
+                case '#':
+                    state = State.GOT_HASH;
+                    break;
+                    
+                //string
+                    
+                case '"':
+                    state = State.GOT_QUOTE;
+                    break;
+                    
                 default:
                     if(Character.isDigit(ch))
                     {
@@ -212,7 +228,7 @@ public class Scanner {
                     }
                     else
                     {
-                        //TODO : handle error
+                        t = stream.new Token(Kind.ILLEGAL_CHAR, beginOffset, index);
                     }
                 }
                 break;  //end of START state
@@ -293,6 +309,72 @@ public class Scanner {
                             t = stream.new Token(Kind.IDENTIFIER, beginOffset, index);
                         }
                     }
+                }
+                break;
+                
+            case GOT_HASH:
+                if(ch == '#')
+                {
+                    state = State.COMMENT_START;
+                }
+                else
+                {
+                    moveIndexBack(ch);
+                    t = stream.new Token(Kind.MALFORMED_COMMENT, beginOffset, index);
+                }
+                break;
+                
+            case COMMENT_START:
+                if(ch == '#')
+                {
+                    state = State.GOT_HASH_INSIDE_COMMENT;
+                }
+                else if(ch == 26)
+                {
+                    t = stream.new Token(Kind.MALFORMED_COMMENT, beginOffset, index);
+                }
+                break;
+                
+            case GOT_HASH_INSIDE_COMMENT:
+                if(ch == '#')   //complete comment
+                {
+                    //no need to make a token, just return to START state
+                    state = State.START;
+                    beginOffset = index;
+                }
+                else if(ch == 26)   //EOF
+                {
+                    t = stream.new Token(Kind.MALFORMED_COMMENT, beginOffset, index);
+                }
+                else
+                {
+                    state = State.COMMENT_START;
+                }
+                break;
+                
+            case GOT_QUOTE:
+                switch (ch)
+                {
+                case '\\':
+                    state = State.GOT_BACKSLASH;
+                    break;
+                case '"':
+                    t = stream.new Token(Kind.STRING_LITERAL, beginOffset, index);
+                    break;
+                case '\r': case '\n': case 26:  //26 = EOF
+                    t = stream.new Token(Kind.MALFORMED_STRING, beginOffset, index);
+                    break;                    
+                }
+                break;
+                
+            case GOT_BACKSLASH:
+                switch(ch)
+                {
+                case 't': case 'n': case 'f': case 'r': case '"': case '\\':
+                    state = State.GOT_QUOTE;
+                    break;
+                default:
+                    t = stream.new Token(Kind.MALFORMED_STRING, beginOffset, index);
                 }
                 break;
                 

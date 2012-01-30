@@ -3,6 +3,7 @@ package edu.ufl.cise.cop5555.sp12;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -58,14 +59,43 @@ public class TokenStream {
 		this.inputChars = inputChars;
 		tokens = new ArrayList<Token>();
 	    //TODO: complete constructor if necessary
+		this.lineBreaks = getLineBreakChars(inputChars);
 	}
 
-	//constructor that takes a Reader.  
+	private int[] getLineBreakChars(char[] inputChars)
+    {
+        ArrayList<Integer> lineBreakList = new ArrayList<Integer>();
+        for(int index = 0; index < inputChars.length; index++)
+        {
+            char ch = inputChars[index];
+            if(ch == '\n' || ch == '\u0085' || ch == '\u2028' || ch == '\u2029')
+            {
+                lineBreakList.add(index);
+            }
+            else if( ch == '\r')
+            {
+                lineBreakList.add(index);
+                if((index + 1) < inputChars.length && inputChars[index + 1] == '\n')
+                {
+                    index++;
+                }
+            }
+        }
+        int[] tempArray = new int[lineBreakList.size()];
+        for(int i = 0; i < lineBreakList.size(); i++)
+        {
+            tempArray[i] = lineBreakList.get(i);
+        }
+        return tempArray;
+    }
+
+    //constructor that takes a Reader.  
 	//Pass this a FileReader to read input from a file.
 	public TokenStream(Reader r) {
 		this.inputChars = getChars(r);
 		tokens = new ArrayList<Token>();
 	    //TODO: complete constructor if necessary
+		this.lineBreaks = getLineBreakChars(inputChars);
 	}
 
 	//constructor that takes a String.
@@ -75,6 +105,7 @@ public class TokenStream {
 		inputString.getChars(0, length, inputChars, 0);
 		tokens = new ArrayList<Token>();
 	    //TODO: complete constructor if necessary
+		this.lineBreaks = getLineBreakChars(inputChars);
 	}
 
 
@@ -169,7 +200,8 @@ public class TokenStream {
 			 */
 			
 			//TODO: IMPLEMENT ME
-		    return 0;
+		    int pos = Arrays.binarySearch(lineBreaks, end-1);
+		    return -(pos + 1) + 1;
 		}
 
 		// returns string containing raw text of token. 

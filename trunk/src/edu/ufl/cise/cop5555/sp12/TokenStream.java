@@ -244,4 +244,9 @@ public class TokenStream {
 			}
 		}
 	}
+
+	public Token getToken(int i)
+	{
+		return tokens.get(i);
+	}
 }

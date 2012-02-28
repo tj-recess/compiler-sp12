@@ -233,4 +233,14 @@ public class TestSimpleParser {
 		assertNull(result);	
 		
 	}
+	
+	@Test
+	public void xtestMapDec28(){
+        String input = "prog main int x;boolean y;map[string,string] mapHash;x=12;x=12*3;y={};y={[x+y,10/12]};y[10]=20; print hello; println xyz*3;do(x>y) string new;new=\"Hello World\"; od;  do x:[y,z] y=y+z*20; od; if(g>s) mapHash[x]=y; fi; if(g<=s) mapHash[y]=x; else mapHash[x]=y; fi; x=x & !y; x=x-y; x=(x-y*20)/20; gorp";  //This should pass without any errors
+        TokenStream stream = getInitializedTokenStream(input);
+        SimpleParser parser = new SimpleParser(stream);
+        SyntaxException result = parser.parse();
+        assertNull(result);
+    
+        }
 }

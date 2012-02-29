@@ -162,9 +162,9 @@ public class TokenStream {
 				char curr = inputChars[i];
 				if (curr == '\\') {
 					char ch = inputChars[++i];
-					switch (ch) { // \ b | \n | \f | \r | \" | \\
-					case 'b':
-						sb.append('\b');
+					switch (ch) { // \t | \n | \f | \r | \" | \\
+					case 't':
+						sb.append('\t');
 						break;
 					case 'n':
 						sb.append('\n');
@@ -207,7 +207,7 @@ public class TokenStream {
 		// returns string containing raw text of token. 
 		//precondition: beg <= end, end < inputChars.length
 		public String getRawText() {
-			assert (beg <= end &&  end < inputChars.length):"called getRatText with invalid beg and end";
+			assert (beg <= end &&  end <= inputChars.length):"called getRatText with invalid beg and end";
 			return String.valueOf(inputChars, beg, end - beg);
 		}
 

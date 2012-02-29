@@ -1,7 +1,11 @@
 package edu.ufl.cise.cop5555.sp12;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import edu.ufl.cise.cop5555.sp12.TokenStream;
 import edu.ufl.cise.cop5555.sp12.TokenStream.Token;
+import edu.ufl.cise.cop5555.sp12.ast.*;
 
 
 public class SimpleParser {
@@ -23,33 +27,33 @@ public class SimpleParser {
 		token = stream.getToken(index++);
 	}
 
-	public SyntaxException parse() {
-	try{
-		Program();  //method corresponding to start symbol
-		return null;
-	}   catch (SyntaxException e){return e;}
+	public AST parse() throws SyntaxException 
+	{
+		return Program();  //method corresponding to start symbol
 	}
 
-	private void Program() throws SyntaxException
+	private Program Program() throws SyntaxException
 	{
 		match(Kind.PROG);
 		match(Kind.IDENTIFIER);
-		Block();
+		Block aBlock = Block();
 		match(Kind.GORP);
-		match(Kind.EOF);		
+		match(Kind.EOF);
+		return new Program(this.token, aBlock);
 	}
 
-	private void Block() throws SyntaxException
+	private Block Block() throws SyntaxException
 	{
+		List<DecOrCommand> decOrCmd = new LinkedList<DecOrCommand>();
 		do
 		{
 			if(predict(NonTerminal.Declaration))
 			{
-				Declaration();
+				decOrCmd.add(Declaration());
 			}
 			else if(predict(NonTerminal.Command))
 			{
-				Command();
+				decOrCmd.add(Command());
 			}
 			else
 			{
@@ -57,21 +61,25 @@ public class SimpleParser {
 			}
 			match(Kind.SEMI);
 		}while(true);
+		return new Block(decOrCmd);
 	}
 
-	private void Command() throws SyntaxException 
+	private DecOrCommand Command() throws SyntaxException 
 	{
+		Command cmd = null;
 		if(predict(NonTerminal.LValue))
 		{
-			LValue();
+			LValue anLValue = LValue();
 			match(Kind.ASSIGN);
 			if(predict(NonTerminal.Expression))
 			{
-				Expression();
+				Expression anExpr = Expression();
+				cmd = new AssignExprCommand(anLValue, anExpr);
 			}
 			else if(predict(NonTerminal.PairList))
 			{
-				PairList();
+				PairList aPairList = PairList();
+				cmd = new AssignPairListCommand(anLValue, aPairList);
 			}
 			else
 			{
@@ -81,94 +89,117 @@ public class SimpleParser {
 		else if(isKind(Kind.PRINT))
 		{
 			consume();
-			Expression();
+			Expression expr = Expression();
+			cmd = new PrintCommand(expr);
 		}
 		else if(isKind(Kind.PRINTLN))
 		{
 			consume();
-			Expression();
+			Expression expr = Expression();
+			cmd = new PrintlnCommand(expr);
 		}
 		else if(isKind(Kind.DO))
 		{
+			Expression anExpr = null;
 			consume();
 			if(isKind(Kind.LEFT_PAREN))
 			{
 				consume();
-				Expression();
+				anExpr = Expression();
 				match(Kind.RIGHT_PAREN);
 			}
 			else
 			{
-				LValue();
+				LValue anLValue = LValue();
 				match(Kind.COLON);
 				match(Kind.LEFT_SQUARE);
 				match(Kind.IDENTIFIER);
 				match(Kind.COMMA);
 				match(Kind.IDENTIFIER);
 				match(Kind.RIGHT_SQUARE);
+				anExpr = new LValueExpression(anLValue);
 			}
-			Block();
-			match(Kind.OD);			
+			Block aBlock = Block();
+			match(Kind.OD);
+			cmd = new DoCommand(anExpr, aBlock);
 		}
 		else if(isKind(Kind.IF))
 		{
 			consume();
 			match(Kind.LEFT_PAREN);
-			Expression();
+			Expression anExpr = Expression();
 			match(Kind.RIGHT_PAREN);
-			Block();
+			Block ifBlock = Block();
+			Block elseBlock = null;
 			if(isKind(Kind.ELSE))
 			{
 				consume();
-				Block();
+				elseBlock = Block();
 			}
 			match(Kind.FI);
+			if(elseBlock == null)
+			{
+				cmd = new IfCommand(anExpr, ifBlock);
+			}
+			else
+			{
+				cmd = new IfElseCommand(anExpr, ifBlock, elseBlock);
+			}
 		}
 		//else ε is valid
+		return cmd;
 	}
 
-	private void PairList() throws SyntaxException 
+	private PairList PairList() throws SyntaxException 
 	{
+		List<Pair> pairList = new LinkedList<Pair>();
 		match(Kind.LEFT_BRACE);
 		if(predict(NonTerminal.Pair))
 		{
-			Pair();
+			pairList.add(Pair());
 			while(isKind(Kind.COMMA))
 			{
 				consume();	//consume comma
-				Pair();
+				pairList.add(Pair());
 			}
 		}
 		match(Kind.RIGHT_BRACE);
+		return new PairList(pairList);
 	}
 
-	private void Pair() throws SyntaxException 
+	private Pair Pair() throws SyntaxException 
 	{
 		match(Kind.LEFT_SQUARE);
-		Expression();
+		Expression expr0 = Expression();
 		match(Kind.COMMA);
-		Expression();
+		Expression expr1 = Expression();
 		match(Kind.RIGHT_SQUARE);
+		return new Pair(expr0, expr1);
 	}
 
-	private void Expression() throws SyntaxException 
+	private Expression Expression() throws SyntaxException 
 	{
-		Term();
+		Expression expr0 = Term();
+		Expression expr1 = null;
 		while(true)
 		{
+			Kind operatorKind = null;
 			if(predict(NonTerminal.RelOp))
 			{
 				RelOp();
+				operatorKind = this.token.kind;
 			}
 			else if(predict(NonTerminal.Term))
 			{
-				Term();				
+				expr1 = Term();				
 			}
 			else 
 			{
 				break;
 			}
+			expr0 = new BinaryOpExpression(expr0, operatorKind, expr1);
 		}
+		return expr0;
 	}
 
 	private void RelOp() 
@@ -176,24 +207,29 @@ public class SimpleParser {
 		consume();
 	}
 
-	private void Term() throws SyntaxException 
+	private Expression Term() throws SyntaxException 
 	{
-		Elem();
+		Expression expr0 = Elem();
 		while(true)
 		{
+			Kind opKind = null;
+			Expression expr1 = null;
 			if(predict(NonTerminal.WeakOp))
 			{
 				WeakOp();
+				opKind = this.token.kind;
 			}
 			else if(predict(NonTerminal.Element))
 			{
-				Elem();
+				expr1 = Elem();
 			}
 			else 
 			{
 				break;
 			}
+			expr0 = new BinaryOpExpression(expr0, opKind, expr1);
 		}
+		return expr0;
 	}
 
 	private void WeakOp() 
@@ -201,24 +237,29 @@ public class SimpleParser {
 		consume();
 	}
 
-	private void Elem() throws SyntaxException 
+	private Expression Elem() throws SyntaxException 
 	{
-		Factor();
+		Expression expr0 = Factor();
 		while(true)
 		{
+			Kind opKind = null;
+			Expression expr1 = null;
 			if(predict(NonTerminal.StrongOp))
 			{
 				StrongOp();
+				opKind = this.token.kind;
 			}
 			else if(predict(NonTerminal.Factor))
 			{
-				Factor();				
+				expr1 = Factor();				
 			}
 			else 
 			{
 				break;
 			}
+			expr0 = new BinaryOpExpression(expr0, opKind, expr1);
 		}
+		return expr0;
 	}
 
 	private void StrongOp() 
@@ -226,31 +267,46 @@ public class SimpleParser {
 		consume();
 	}
 
-	private void Factor() throws SyntaxException 
+	private Expression Factor() throws SyntaxException 
 	{
 		if(predict(NonTerminal.LValue))
 		{
-			LValue();
+			LValue anLValue = LValue();
+			return new LValueExpression(anLValue);
 		}
-		else if(isKind(Kind.INTEGER_LITERAL) || isKind(Kind.BOOLEAN_LITERAL) || isKind(Kind.STRING_LITERAL))
+		else if(isKind(Kind.INTEGER_LITERAL))
 		{
 			consume();
+			return new IntegerLiteralExpression(this.token);
+		}
+		else if(isKind(Kind.BOOLEAN_LITERAL))
+		{
+			consume();
+			return new BooleanLiteralExpression(this.token);
+		}
+		else if(isKind(Kind.STRING_LITERAL))
+		{
+			consume();
+			return new StringLiteralExpression(this.token);
 		}
 		else if(isKind(Kind.LEFT_PAREN))
 		{
 			consume();
-			Expression();
+			Expression anExpr = Expression();
 			match(Kind.RIGHT_PAREN);
+			return anExpr;
 		}
 		else if(isKind(Kind.NOT))
 		{
 			consume();
-			Factor();
+			Expression anExpr = Factor();
+			return new UnaryOpExpression(Kind.NOT, anExpr);
 		}
 		else if(isKind(Kind.MINUS))
 		{
 			consume();
-			Factor();
+			Expression anExpr = Factor();
+			return new UnaryOpExpression(Kind.MINUS, anExpr);
 		}
 		else
 		{
@@ -258,50 +314,57 @@ public class SimpleParser {
 		}
 	}
 
-	private void LValue() throws SyntaxException 
+	private LValue LValue() throws SyntaxException 
 	{
 		match(Kind.IDENTIFIER);
 		if(isKind(Kind.LEFT_SQUARE))
 		{
 			consume();
-			Expression();
+			Expression anExpr = Expression();
 			match(Kind.RIGHT_SQUARE);
+			return new ExprLValue(this.token, anExpr);
 		}
+		return new SimpleLValue(this.token);
 	}
 
-	private void Declaration() throws SyntaxException 
+	private DecOrCommand Declaration() throws SyntaxException 
 	{
 		//control here means predict(Declaration) already returned true
 		//i.e. type must have been matched already
-		Type();
+		Type aType = Type();
 		match(Kind.IDENTIFIER);
+		return new Declaration(aType, this.token);
 	}
 
-	private void Type() throws SyntaxException 
+	private Type Type() throws SyntaxException 
 	{
+		Type aType = null;
 		if(predict(NonTerminal.SimpleType))
 		{
-			SimpleType();
+			aType = SimpleType();
 		}
 		else if(predict(NonTerminal.CompoundType))
 		{
-			CompoundType();			
+			aType = CompoundType();
 		}
+		return aType;
 	}
 
-	private void CompoundType() throws SyntaxException 
+	private Type CompoundType() throws SyntaxException 
 	{
 		consume();
 		match(Kind.LEFT_SQUARE);
-		SimpleType();
+		SimpleType keyType = SimpleType();
 		match(Kind.COMMA);
-		Type();
+		Type valType = Type();
 		match(Kind.RIGHT_SQUARE);
+		return new CompoundType(keyType, valType);
 	}
 
-	private void SimpleType() throws SyntaxException 
+	private SimpleType SimpleType() throws SyntaxException 
 	{
 		consume();
+		return new SimpleType(this.token.kind);
 	}
 
 	private boolean isKind(Kind kind) 

@@ -14,7 +14,4 @@ public class Block extends AST {
 	public Object visit(ASTVisitor v, Object arg) throws Exception {
 		return v.visitBlock(this,arg);
 	}
-	
-	
-
 }

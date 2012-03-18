@@ -2,16 +2,19 @@ package edu.ufl.cise.cop5555.sp12.ast;
 
 import java.util.List;
 
-public class Block extends AST {
-	
-	List<DecOrCommand> decOrCommands;
-	
-	public Block(List<DecOrCommand> decOrCommands){
-		this.decOrCommands = decOrCommands;
-	}
+public class Block extends AST
+{
 
-	@Override
-	public Object visit(ASTVisitor v, Object arg) throws Exception {
-		return v.visitBlock(this,arg);
-	}
+    List<DecOrCommand> decOrCommands;
+
+    public Block(List<DecOrCommand> decOrCommands)
+    {
+        this.decOrCommands = decOrCommands;
+    }
+
+    @Override
+    public Object visit(ASTVisitor v, Object arg) throws Exception
+    {
+        return v.visitBlock(this, arg);
+    }
 }

@@ -5,7 +5,7 @@ import java.util.List;
 public class Block extends AST
 {
 
-    List<DecOrCommand> decOrCommands;
+    public final List<DecOrCommand> decOrCommands;
 
     public Block(List<DecOrCommand> decOrCommands)
     {

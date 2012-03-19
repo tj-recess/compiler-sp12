@@ -18,4 +18,15 @@ public class CompoundType extends Type
         return v.visitCompoundType(this, arg);
     }
 
+    @Override
+    public boolean equals(Object anotherType)
+    {
+        if(anotherType instanceof CompoundType)
+        {
+            CompoundType cType = (CompoundType) anotherType;
+            return this.keyType.equals(cType.keyType) && this.valType.equals(cType.valType);
+        }
+        return false;
+    }
+
 }

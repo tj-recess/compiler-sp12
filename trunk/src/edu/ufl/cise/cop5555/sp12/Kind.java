@@ -45,4 +45,9 @@ public enum Kind
     {
         return false;
     }
+    
+    public String toLower()
+    {
+        return this.toString().toLowerCase();
+    }
 }

@@ -1,7 +1,5 @@
 package edu.ufl.cise.cop5555.sp12.context;
 
-import static org.junit.Assert.fail;
-
 import org.junit.Test;
 
 import edu.ufl.cise.cop5555.sp12.Parser;
@@ -56,40 +54,61 @@ public class ContextCheckVisitorTest
         ast.visit(visitor, null);
     }
 
-    @Test
-    public void testVisitSimpleType()
+    @Test(expected=ContextException.class)
+    public void testVisitAssignExprCommand() throws Exception
     {
-        fail("Not yet implemented");
+        String input = "prog Test int i; boolean b; i = b; gorp";
+        this.initParser(input);
+        AST ast = parser.parse();
+        ast.visit(visitor, null);
+    }
+    
+    @Test(expected=ContextException.class)
+    public void testVisitAssignExprCommand2() throws Exception
+    {
+        String input = "prog Test1 int a; a = (2*3) ; boolean b; b = (2 & 2) ; gorp";
+        this.initParser(input);
+        AST ast = parser.parse();
+        ast.visit(visitor, null);
     }
 
     @Test
-    public void testVisitCompoundType()
+    public void testVisitAssignPairListCommand() throws Exception
     {
-        fail("Not yet implemented");
+        String input = "prog Test map[int, map[string, boolean]] m;" +
+                "map[string, boolean] sbmap;" +
+//        		" m = {[3,[\"str\", true]]}; gorp";
+                "sbmap = {[\"str\", true]}; gorp";
+        this.initParser(input);
+        AST ast = parser.parse();
+        ast.visit(visitor, null);
     }
 
     @Test
-    public void testVisitAssignExprCommand()
+    public void testVisitPrintCommand() throws Exception
     {
-        fail("Not yet implemented");
+        String input = "prog Test1 print (true & false) ; gorp";
+        this.initParser(input);
+        AST ast = parser.parse();
+        ast.visit(visitor, null);
+    }
+    
+    @Test(expected=ContextException.class)
+    public void testVisitPrintCommand2() throws Exception
+    {
+        String input = "prog Test1 print (2 * \"str\") ; gorp";
+        this.initParser(input);
+        AST ast = parser.parse();
+        ast.visit(visitor, null);
     }
 
     @Test
-    public void testVisitAssignPairListCommand()
+    public void testVisitPrintlnCommand() throws Exception
     {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void testVisitPrintCommand()
-    {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void testVisitPrintlnCommand()
-    {
-        fail("Not yet implemented");
+        String input = "prog Test1 map[int, int] x; println x; gorp";
+        this.initParser(input);
+        AST ast = parser.parse();
+        ast.visit(visitor, null);
     }
 
     @Test
@@ -132,6 +151,16 @@ public class ContextCheckVisitorTest
     public void testVisitDoEachCommand2() throws Exception
     {
         String input = "prog Test1 map[int, int] x; int x1; string x2; do x : [x1 , x2] println x1;  od; gorp";
+        this.initParser(input);
+        AST ast = parser.parse();
+        ast.visit(visitor, null);
+    }
+    
+    @Test//(expected=ContextException.class)
+    public void testVisitDoEachCommand3() throws Exception
+    {
+        String input = "prog Test1 map[int, int] x1; map[int, int] x2; int c1; int c2; int c4;" +
+        		" do x1 : [c1 , c2] do x2 : [c1, c4] boolean znunu; boolean asfa; znunu = asfa; od; println c4;  od; gorp";
         this.initParser(input);
         AST ast = parser.parse();
         ast.visit(visitor, null);
@@ -185,10 +214,14 @@ public class ContextCheckVisitorTest
         ast.visit(visitor, null);
     }
 
-    @Test
-    public void testVisitSimpleLValue()
+    @Test(expected=ContextException.class)
+    public void testVisitSimpleLValue() throws Exception
     {
-        fail("Not yet implemented");
+        String input = "prog Test int ab; int x; if(x == 10) boolean ab; string s; ab = true ; ; ; fi; " +
+        		"ab = 10; s = \"xyz\"; string ab; gorp";
+        this.initParser(input);
+        AST ast = parser.parse();
+        ast.visit(visitor, null);
     }
 
     @Test
@@ -201,10 +234,22 @@ public class ContextCheckVisitorTest
         ast.visit(visitor, null);
     }
 
-    @Test
-    public void testVisitPair()
+    @Test(expected=ContextException.class)
+    public void testVisitPair() throws Exception
     {
-        fail("Not yet implemented");
+        String input = "prog Test1  map[int, boolean] m; m = {[2,3], [2, false]} ;gorp";
+        this.initParser(input);
+        AST ast = parser.parse();
+        ast.visit(visitor, null);
+    }
+
+    @Test
+    public void testVisitPair2() throws Exception
+    {
+        String input = "prog Test1  map[int, boolean] m; m = {[2, false]} ;gorp";
+        this.initParser(input);
+        AST ast = parser.parse();
+        ast.visit(visitor, null);
     }
 
     @Test(expected=ContextException.class)
@@ -226,39 +271,83 @@ public class ContextCheckVisitorTest
     }
 
     @Test
-    public void testVisitLValueExpression()
+    public void testVisitIntegerLiteralExpression() throws Exception
     {
-        fail("Not yet implemented");
+        String input = "prog Test1 int i; i = 2/3*4/5+6-7 ;gorp";
+        this.initParser(input);
+        AST ast = parser.parse();
+        ast.visit(visitor, null);
     }
 
     @Test
-    public void testVisitIntegerLiteralExpression()
+    public void testVisitBooleanLiteralExpression() throws Exception
     {
-        fail("Not yet implemented");
+        String input = "prog Test1 boolean b; b = true|false & (false|true) & false & true ;gorp";
+        this.initParser(input);
+        AST ast = parser.parse();
+        ast.visit(visitor, null);
     }
 
     @Test
-    public void testVisitBooleanLiteralExpression()
+    public void testVisitStringLiteralExpression() throws Exception
     {
-        fail("Not yet implemented");
+        String input = "prog Test1 string s; s = \"waste\" + \"of\" + \"time\"; ;gorp";
+        this.initParser(input);
+        AST ast = parser.parse();
+        ast.visit(visitor, null);
     }
 
     @Test
-    public void testVisitStringLiteralExpression()
+    public void testVisitUnaryOpExpression() throws Exception
     {
-        fail("Not yet implemented");
+        String input = "prog Test1 int i; i = -1 + -2; if(i == -3) print true; fi; gorp";
+        this.initParser(input);
+        AST ast = parser.parse();
+        ast.visit(visitor, null);
     }
 
     @Test
-    public void testVisitUnaryOpExpression()
+    public void testVisitUnaryOpExpression2() throws Exception
     {
-        fail("Not yet implemented");
+        String input = "prog Test1 boolean i; boolean j; i = !j; gorp";
+        this.initParser(input);
+        AST ast = parser.parse();
+        ast.visit(visitor, null);
     }
-
+    
     @Test
-    public void testVisitBinaryOpExpression()
+    public void testVisitBinaryOpExpression() throws Exception
     {
-        fail("Not yet implemented");
+        String input = "prog Test1 string s; int i; i = -3; s = \"abc\" + i; gorp";
+        this.initParser(input);
+        AST ast = parser.parse();
+        ast.visit(visitor, null);
     }
-
+    
+    @Test
+    public void testVisitBinaryOpExpression2() throws Exception
+    {
+        String input = "prog Test1 string s; int i; boolean b; i = -3; s = \"abc\" + b; gorp";
+        this.initParser(input);
+        AST ast = parser.parse();
+        ast.visit(visitor, null);
+    }
+    
+    @Test(expected=ContextException.class)
+    public void testVisitBinaryOpExpression3() throws Exception
+    {
+        String input = "prog Test1 string s; int i; map[int, string] m; i = -3; s = \"abc\" + m; gorp";
+        this.initParser(input);
+        AST ast = parser.parse();
+        ast.visit(visitor, null);
+    }
+    
+    @Test
+    public void testManyExpressions() throws Exception
+    {
+        String input = "prog Test map [int , map[string, boolean]] m ;  map[string, boolean] m1; string a; boolean b; m = {[2 , m1]} ; gorp";
+        this.initParser(input);
+        AST ast = parser.parse();
+        ast.visit(visitor, null);
+    }
 }

@@ -66,7 +66,8 @@ public class ContextCheckVisitor implements ASTVisitor
             throws Exception
     {
         check(!declaration.ident.equals(this.programName), declaration, "Identifier name is same as program name");
-        this.symbolTable.insert(declaration.ident.getText(), declaration);
+        check(this.symbolTable.insert(declaration.ident.getText(), declaration), declaration,
+                "Duplicate declaration in scope");
         return null;
     }
 
@@ -124,7 +125,7 @@ public class ContextCheckVisitor implements ASTVisitor
         check(lvalueType instanceof CompoundType, assignPairListCommand, 
                 "assignPairListCommand.lvalue is not of CompoundType");
         check(pairListType instanceof CompoundType, assignPairListCommand, 
-                "assignPairListCommand.lvalue is not of CompoundType");
+                "assignPairListCommand.PairListType is not of CompoundType");
         CompoundType lvalueCType = (CompoundType) lvalueType;
         CompoundType pairListCType = (CompoundType) pairListType;
         
@@ -163,6 +164,7 @@ public class ContextCheckVisitor implements ASTVisitor
         Type expressionType = (Type) doCommand.expression.visit(this, arg);
         check(expressionType instanceof SimpleType &&  ((SimpleType)expressionType).type.equals(Kind.BOOLEAN),
                 doCommand, "Expression in doCommand is not of boolean type");
+        doCommand.block.visit(this, arg);
         return null;
     }
 
@@ -189,9 +191,13 @@ public class ContextCheckVisitor implements ASTVisitor
         Type lvalueType = (Type)doEachCommand.lValue.visit(this, arg);
         check(lvalueType instanceof CompoundType, doEachCommand, "LvalueType != CompoundType");
         CompoundType lvalueCType = (CompoundType)lvalueType;
-        check(lvalueCType.keyType.type.equals(doEachCommand.key.kind), doEachCommand, " Identifier0t.type != keyType");
-        check(lvalueCType.valType.equals(doEachCommand.val.kind), doEachCommand, " Identifier0t.type != keyType");
-        //TODO : this is wrong/incomplete.
+        Declaration keyDeclaration = this.symbolTable.lookup(doEachCommand.key.getText());
+        check(lvalueCType.keyType.equals(keyDeclaration.type), doEachCommand, " Identifier0.type != keyType");
+        
+        //get type of doEachCommand.val from Symbol table
+        Declaration valDeclaration = this.symbolTable.lookup(doEachCommand.val.getText());
+        check(lvalueCType.valType.equals(valDeclaration.type), doEachCommand, " Identifier1.type != valType");
+        doEachCommand.block.visit(this, arg);
         return null;
     }
 
@@ -201,6 +207,7 @@ public class ContextCheckVisitor implements ASTVisitor
     {
         Type expressionType = (Type)ifCommand.expression.visit(this, arg);
         check(expressionType.equals(booleanType), ifCommand, "expression is not of boolean type");
+        ifCommand.block.visit(this, arg);
         return null;
     }
 
@@ -210,6 +217,8 @@ public class ContextCheckVisitor implements ASTVisitor
     {
         Type expressionType = (Type)ifElseCommand.expression.visit(this, arg);
         check(expressionType.equals(booleanType), ifElseCommand, "expression is not of boolean type");
+        ifElseCommand.ifBlock.visit(this, arg);
+        ifElseCommand.elseBlock.visit(this, arg);
         return null;
     }
 
@@ -223,10 +232,9 @@ public class ContextCheckVisitor implements ASTVisitor
     public Object visitSimpleLValue(SimpleLValue simpleLValue, Object arg)
             throws Exception
     {
-        Declaration dec = this.symbolTable.lookup(simpleLValue.identifier.getStringVal());
-        check(dec != null && dec.type.equals(new SimpleType(simpleLValue.identifier.kind)),
-                simpleLValue, "Either Identifier's declaration is not present in symbol table OR type of simpleLValue " +
-                		"is not same as type of declaration");
+        Declaration dec = this.symbolTable.lookup(simpleLValue.identifier.getText());
+        check(dec != null, simpleLValue, "Either Identifier's declaration is not present in" +
+        		" symbol table OR type of simpleLValue is not same as type of declaration");
         return dec.type;
     }
 
@@ -246,42 +254,42 @@ public class ContextCheckVisitor implements ASTVisitor
     public Object visitExprLValue(ExprLValue exprLValue, Object arg)
             throws Exception
     {
-        Declaration dec = this.symbolTable.lookup(exprLValue.identifier.getStringVal());
-        check(dec.type instanceof CompoundType, dec, "Declaration is not of compound type");
+        Declaration dec = this.symbolTable.lookup(exprLValue.identifier.getText());
+        check(dec != null, exprLValue, "Identifier '" + exprLValue.identifier.getText() + "' not found in symbol table");
+        check(dec.type instanceof CompoundType, exprLValue, "Declaration is not of compound type");
         CompoundType cType = (CompoundType) dec.type;   //dec.type is guaranteed to be of compound type
         Type expressionType = (Type)exprLValue.expression.visit(this, arg);
-        check(cType.keyType.equals(expressionType), exprLValue.expression, 
+        check(cType.keyType.equals(expressionType), exprLValue, 
                 "keyType in Identifier's declaration is not same as exprLValue.expression's type");
-        Type exprLvalType = (Type) exprLValue.visit(this, arg);
-        check(cType.valType.equals(exprLvalType), exprLValue, 
-                "valType in Identifier's declaration is not same as exprLValue's type");
+//        Type exprLvalType = (Type) exprLValue.expression.visit(this, arg);
+//        check(cType.valType.equals(exprLvalType), exprLValue, 
+//                "valType in Identifier's declaration is not same as exprLValue's type");
         return cType.valType;
     }
 
     @Override
     public Object visitPair(Pair pair, Object arg) throws Exception
     {
-        return null;
+        Type aPairExpr0Type = (Type) pair.expression0.visit(this, arg);
+        Type aPairExpr1Type = (Type) pair.expression1.visit(this, arg);
+        return new CompoundType((SimpleType)aPairExpr0Type, aPairExpr1Type);
     }
 
     @Override
     public Object visitPairList(PairList pairList, Object arg) throws Exception
     {
-        Pair lastMatched = null;
+        Type lastMatchedPairType = null;
         for(Pair aPair : pairList.pairs)
         {
-            if(lastMatched != null)
+            Type currentPairType = (Type) aPair.visit(this, arg);
+            if(lastMatchedPairType != null)
             {
-                Type lastMatchedExpr0Type = (Type) lastMatched.expression0.visit(this, arg);
-                Type lastMatchedExpr1Type = (Type) lastMatched.expression1.visit(this, arg);
-                Type aPairExpr0Type = (Type) aPair.expression0.visit(this, arg);
-                Type aPairExpr1Type = (Type) aPair.expression1.visit(this, arg);
-                check(lastMatchedExpr0Type.equals(aPairExpr0Type) && lastMatchedExpr1Type.equals(aPairExpr1Type)
-                        , pairList, "All pairs in pairlist are not of same type");
+                check(lastMatchedPairType.equals(currentPairType), pairList, 
+                        "All pairs in pairlist are not of same type");
             }
-            lastMatched = aPair;
+            lastMatchedPairType = currentPairType;
         }
-        return null;
+        return lastMatchedPairType;
     }
 
     @Override
@@ -295,7 +303,7 @@ public class ContextCheckVisitor implements ASTVisitor
             IntegerLiteralExpression integerLiteralExpression, Object arg)
             throws Exception
     {
-        check(integerLiteralExpression.integerLiteral.kind.equals(Kind.INT), integerLiteralExpression,
+        check(integerLiteralExpression.integerLiteral.kind.equals(Kind.INTEGER_LITERAL), integerLiteralExpression,
         "Type of integerLiteral is not equal to Int");
         return new SimpleType(Kind.INT);
     }
@@ -305,7 +313,7 @@ public class ContextCheckVisitor implements ASTVisitor
             BooleanLiteralExpression booleanLiteralExpression, Object arg)
             throws Exception
     {
-        check(booleanLiteralExpression.booleanLiteral.kind.equals(Kind.BOOLEAN), booleanLiteralExpression,
+        check(booleanLiteralExpression.booleanLiteral.kind.equals(Kind.BOOLEAN_LITERAL), booleanLiteralExpression,
         "Type of booleanLiteral is not equal to Boolean");
         return new SimpleType(Kind.BOOLEAN);
     }
@@ -315,7 +323,7 @@ public class ContextCheckVisitor implements ASTVisitor
             StringLiteralExpression stringLiteralExpression, Object arg)
             throws Exception
     {
-        check(stringLiteralExpression.stringLiteral.kind.equals(Kind.STRING), stringLiteralExpression,
+        check(stringLiteralExpression.stringLiteral.kind.equals(Kind.STRING_LITERAL), stringLiteralExpression,
                 "Type of stringLiteral is not equal to String");
         return new SimpleType(Kind.STRING);
     }

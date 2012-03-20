@@ -91,6 +91,7 @@ public class SymbolTable
 	    if(existingList == null)
 	    {
 	        existingList = new LinkedList<SymbolTableEntry>();
+	        this.symbolTable.put(ident, existingList);
 	    }
 	    else
 	    {

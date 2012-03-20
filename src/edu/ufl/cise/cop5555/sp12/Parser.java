@@ -7,14 +7,14 @@ import edu.ufl.cise.cop5555.sp12.TokenStream;
 import edu.ufl.cise.cop5555.sp12.TokenStream.Token;
 import edu.ufl.cise.cop5555.sp12.ast.*;
 
-public class SimpleParser
+public class Parser
 {
 
     private TokenStream stream;
     private int index = 0;
     private Token token;
 
-    public SimpleParser(TokenStream stream)
+    public Parser(TokenStream stream)
     {
         this.stream = stream;
         Scanner s = new Scanner(this.stream);
@@ -307,7 +307,7 @@ public class SimpleParser
         Token aToken = match(Kind.IDENTIFIER);
         if (isKind(Kind.LEFT_SQUARE))
         {
-            aToken = consume();
+            consume();
             Expression anExpr = Expression();
             match(Kind.RIGHT_SQUARE);
             return new ExprLValue(aToken, anExpr);

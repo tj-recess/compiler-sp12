@@ -8,7 +8,7 @@ import edu.ufl.cise.cop5555.sp12.ast.ToStringVisitor;
 public class TestSimpleParser
 {
 
-    private TokenStream getInitializedTokenStream(String input)
+    public static TokenStream getInitializedTokenStream(String input)
     {
         TokenStream stream = new TokenStream(input);
         Scanner s = new Scanner(stream);
@@ -21,7 +21,7 @@ public class TestSimpleParser
     {
         String input = "prog Test1 gorp";
         TokenStream stream = getInitializedTokenStream(input);
-        SimpleParser parser = new SimpleParser(stream);
+        Parser parser = new Parser(stream);
         // parser.parse();
         AST ast = parser.parse();
         ToStringVisitor pv = new ToStringVisitor();
@@ -36,7 +36,7 @@ public class TestSimpleParser
     {
         String input = "prog Test1 int x; gorp";
         TokenStream stream = getInitializedTokenStream(input);
-        SimpleParser parser = new SimpleParser(stream);
+        Parser parser = new Parser(stream);
         // parser.parse();
         AST ast = parser.parse();
         ToStringVisitor pv = new ToStringVisitor();
@@ -50,7 +50,7 @@ public class TestSimpleParser
     {
         String input = "prog Test1 boolean x; gorp";
         TokenStream stream = getInitializedTokenStream(input);
-        SimpleParser parser = new SimpleParser(stream);
+        Parser parser = new Parser(stream);
         // parser.parse();
         AST ast = parser.parse();
         ToStringVisitor pv = new ToStringVisitor();
@@ -64,7 +64,7 @@ public class TestSimpleParser
     {
         String input = "prog Test1 map[int,string] y; gorp";
         TokenStream stream = getInitializedTokenStream(input);
-        SimpleParser parser = new SimpleParser(stream);
+        Parser parser = new Parser(stream);
         AST ast = parser.parse();
         ToStringVisitor pv = new ToStringVisitor();
         ast.visit(pv, "");
@@ -77,7 +77,7 @@ public class TestSimpleParser
     {
         String input = "prog Test1 map[int,map[string,boolean]] m; gorp";
         TokenStream stream = getInitializedTokenStream(input);
-        SimpleParser parser = new SimpleParser(stream);
+        Parser parser = new Parser(stream);
         AST ast = parser.parse();
         ToStringVisitor pv = new ToStringVisitor();
         ast.visit(pv, "");
@@ -96,7 +96,7 @@ public class TestSimpleParser
                                                                          // be
                                                                          // ident
         TokenStream stream = getInitializedTokenStream(input);
-        SimpleParser parser = new SimpleParser(stream);
+        Parser parser = new Parser(stream);
         parser.parse();
         // assertNotNull(result);
         // assertEquals(SEMI, result.t.kind);
@@ -107,7 +107,7 @@ public class TestSimpleParser
     {
         String input = "prog gorp";
         TokenStream stream = getInitializedTokenStream(input);
-        SimpleParser parser = new SimpleParser(stream);
+        Parser parser = new Parser(stream);
         parser.parse();
     }
 
@@ -116,7 +116,7 @@ public class TestSimpleParser
     {
         String input = "gorp";
         TokenStream stream = getInitializedTokenStream(input);
-        SimpleParser parser = new SimpleParser(stream);
+        Parser parser = new Parser(stream);
         parser.parse();
     }
 
@@ -125,7 +125,7 @@ public class TestSimpleParser
     {
         String input = "prog Test ; gorp";
         TokenStream stream = getInitializedTokenStream(input);
-        SimpleParser parser = new SimpleParser(stream);
+        Parser parser = new Parser(stream);
         AST ast = parser.parse();
         ToStringVisitor pv = new ToStringVisitor();
         ast.visit(pv, "");
@@ -138,7 +138,7 @@ public class TestSimpleParser
     {
         String input = "prog Test int a; int b; ; ;gorp";
         TokenStream stream = getInitializedTokenStream(input);
-        SimpleParser parser = new SimpleParser(stream);
+        Parser parser = new Parser(stream);
         parser.parse();
 
     }
@@ -148,7 +148,7 @@ public class TestSimpleParser
     {
         String input = "prog Test a[true] = truegorp";
         TokenStream stream = getInitializedTokenStream(input);
-        SimpleParser parser = new SimpleParser(stream);
+        Parser parser = new Parser(stream);
         parser.parse();
     }
 
@@ -157,7 +157,7 @@ public class TestSimpleParser
     {
         String input = "";
         TokenStream stream = getInitializedTokenStream(input);
-        SimpleParser parser = new SimpleParser(stream);
+        Parser parser = new Parser(stream);
         parser.parse();
 
     }
@@ -167,7 +167,7 @@ public class TestSimpleParser
     {
         String input = "prog Test a[true] = true; ;;;gorp";
         TokenStream stream = getInitializedTokenStream(input);
-        SimpleParser parser = new SimpleParser(stream);
+        Parser parser = new Parser(stream);
         parser.parse();
 
     }
@@ -177,7 +177,7 @@ public class TestSimpleParser
     {
         String input = "prog Test int a; boolean b;string s;map[int,int] m; map[int,map[int , boolean ] ] m; map[int,map[boolean,map[string,string]]] m;gorp";
         TokenStream stream = getInitializedTokenStream(input);
-        SimpleParser parser = new SimpleParser(stream);
+        Parser parser = new Parser(stream);
         parser.parse();
 
     }
@@ -187,7 +187,7 @@ public class TestSimpleParser
     {
         String input = "prog Test a = b & b -2; print \"abc\"+2;gorp";
         TokenStream stream = getInitializedTokenStream(input);
-        SimpleParser parser = new SimpleParser(stream);
+        Parser parser = new Parser(stream);
         parser.parse();
 
     }
@@ -197,7 +197,7 @@ public class TestSimpleParser
     {
         String input = "prog Test if(2* \"abc\") ; fi ;gorp";
         TokenStream stream = getInitializedTokenStream(input);
-        SimpleParser parser = new SimpleParser(stream);
+        Parser parser = new Parser(stream);
         parser.parse();
 
     }
@@ -207,7 +207,7 @@ public class TestSimpleParser
     {
         String input = "prog Test if(2* \"abc\") ; else ; fi ;gorp";
         TokenStream stream = getInitializedTokenStream(input);
-        SimpleParser parser = new SimpleParser(stream);
+        Parser parser = new Parser(stream);
         parser.parse();
 
     }
@@ -217,7 +217,7 @@ public class TestSimpleParser
     {
         String input = "prog Test int a; boolean b; string c; do b : [a,b] od; gorp";
         TokenStream stream = getInitializedTokenStream(input);
-        SimpleParser parser = new SimpleParser(stream);
+        Parser parser = new Parser(stream);
         parser.parse();
 
     }
@@ -227,7 +227,7 @@ public class TestSimpleParser
     {
         String input = "prog Test do (2* 5 + a[\"abc\"] == true ) od;gorp";
         TokenStream stream = getInitializedTokenStream(input);
-        SimpleParser parser = new SimpleParser(stream);
+        Parser parser = new Parser(stream);
         parser.parse();
 
     }
@@ -237,7 +237,7 @@ public class TestSimpleParser
     {
         String input = "prog Test a[2/ \"a\"] = {} ;gorp";
         TokenStream stream = getInitializedTokenStream(input);
-        SimpleParser parser = new SimpleParser(stream);
+        Parser parser = new Parser(stream);
         parser.parse();
 
     }
@@ -248,7 +248,7 @@ public class TestSimpleParser
         String input = "prog Test a[(!2)] = {[2,false] , [2,2] };gorp";
 
         TokenStream stream = getInitializedTokenStream(input);
-        SimpleParser parser = new SimpleParser(stream);
+        Parser parser = new Parser(stream);
         parser.parse();
 
     }
@@ -258,7 +258,7 @@ public class TestSimpleParser
     {
         String input = "prog Test1 do println : [x1 , x2] println x1;  od; gorp";
         TokenStream stream = getInitializedTokenStream(input);
-        SimpleParser parser = new SimpleParser(stream);
+        Parser parser = new Parser(stream);
         AST ast = parser.parse();
         ToStringVisitor pv = new ToStringVisitor();
         ast.visit(pv, "");
@@ -276,7 +276,7 @@ public class TestSimpleParser
                                                                                                                                                                                                                                                                                                                                         // any
                                                                                                                                                                                                                                                                                                                                         // errors
         TokenStream stream = getInitializedTokenStream(input);
-        SimpleParser parser = new SimpleParser(stream);
+        Parser parser = new Parser(stream);
         // parser.parse();
         AST ast = parser.parse();
         ToStringVisitor pv = new ToStringVisitor();
@@ -291,7 +291,7 @@ public class TestSimpleParser
     {
         String input = "prog y string x; x[x[x(4)]]=-y[4+-y]; gorp";
         TokenStream stream = getInitializedTokenStream(input);
-        SimpleParser parser = new SimpleParser(stream);
+        Parser parser = new Parser(stream);
         AST tree;
         try
         {
@@ -320,7 +320,7 @@ public class TestSimpleParser
     {
         String input = "prog Test1 do x1 : [x1 , x2] do x2 : [x1, c4] znunu = asfa; od; println x;  od; gorp";
         TokenStream stream = getInitializedTokenStream(input);
-        SimpleParser parser = new SimpleParser(stream);
+        Parser parser = new Parser(stream);
         AST ast = parser.parse();
         ToStringVisitor pv = new ToStringVisitor();
         ast.visit(pv, "");
@@ -333,7 +333,7 @@ public class TestSimpleParser
     {
         String input = "prog Test1 if (a + b - c * d / e | \"a\" < true > false >= x <= y - -a != k & f) ab = true ; ; ; fi; gorp";
         TokenStream stream = getInitializedTokenStream(input);
-        SimpleParser parser = new SimpleParser(stream);
+        Parser parser = new Parser(stream);
         AST ast = parser.parse();
         ToStringVisitor pv = new ToStringVisitor();
         ast.visit(pv, "");
@@ -346,7 +346,7 @@ public class TestSimpleParser
     {
         String input = "prog Test1 if ( x | y ) a = true; else y=s; fi;  gorp";
         TokenStream stream = getInitializedTokenStream(input);
-        SimpleParser parser = new SimpleParser(stream);
+        Parser parser = new Parser(stream);
         AST ast = parser.parse();
         ToStringVisitor pv = new ToStringVisitor();
         ast.visit(pv, " ");
@@ -359,7 +359,7 @@ public class TestSimpleParser
     {
         String input = "prog Test1 if (a + b - c * d / e | \"a\" < true > false >= x <= y - -a != k & f) int x; string y; boolean z; map[int, map[int, map[int, string]]] m1; ab = sc; ;fi;  gorp";
         TokenStream stream = getInitializedTokenStream(input);
-        SimpleParser parser = new SimpleParser(stream);
+        Parser parser = new Parser(stream);
         AST ast = parser.parse();
         ToStringVisitor pv = new ToStringVisitor();
         ast.visit(pv, " ");
@@ -372,7 +372,7 @@ public class TestSimpleParser
     {
         String input = "prog Test1 if ( x | y ) a = true; else y=s; fi;  gorp";
         TokenStream stream = getInitializedTokenStream(input);
-        SimpleParser parser = new SimpleParser(stream);
+        Parser parser = new Parser(stream);
         AST ast = parser.parse();
         ToStringVisitor pv = new ToStringVisitor();
         ast.visit(pv, " ");
@@ -385,7 +385,7 @@ public class TestSimpleParser
     {
         String input = "prog Test1 if ((a + b - c * d / e | \"a\" < true > false >= x <= y - -a != k & f)) a = true; else y=s; fi;  gorp";
         TokenStream stream = getInitializedTokenStream(input);
-        SimpleParser parser = new SimpleParser(stream);
+        Parser parser = new Parser(stream);
         AST ast = parser.parse();
         ToStringVisitor pv = new ToStringVisitor();
         ast.visit(pv, " ");
@@ -398,7 +398,7 @@ public class TestSimpleParser
     {
         String input = "prog Test1 if (a + b - c * d / e | \"a\" < true > false >= x <= y - -a != k & f) int x; string y; boolean z; map[int, map[int, map[int, string]]] m1; ab = sc;  fi;  gorp";
         TokenStream stream = getInitializedTokenStream(input);
-        SimpleParser parser = new SimpleParser(stream);
+        Parser parser = new Parser(stream);
         AST ast = parser.parse();
         ToStringVisitor pv = new ToStringVisitor();
         ast.visit(pv, " ");
@@ -411,7 +411,7 @@ public class TestSimpleParser
     {
         String input = "prog Test1 if (a) b=true; if (x==5) at=5; else at = 6; fi; if (x==5) a=w; fi; fi;  gorp";
         TokenStream stream = getInitializedTokenStream(input);
-        SimpleParser parser = new SimpleParser(stream);
+        Parser parser = new Parser(stream);
         AST ast = parser.parse();
         ToStringVisitor pv = new ToStringVisitor();
         ast.visit(pv, " ");
@@ -438,7 +438,7 @@ public class TestSimpleParser
                         "od;\n" +
                         "gorp";
         TokenStream stream = getInitializedTokenStream(input);
-        SimpleParser parser = new SimpleParser(stream);
+        Parser parser = new Parser(stream);
         AST ast = parser.parse();
         ToStringVisitor pv = new ToStringVisitor();
         ast.visit(pv, " ");
@@ -451,7 +451,7 @@ public class TestSimpleParser
     {
         String input = "prog Test1 m = a --b; gorp";
         TokenStream stream = getInitializedTokenStream(input);
-        SimpleParser parser = new SimpleParser(stream);
+        Parser parser = new Parser(stream);
         AST ast = parser.parse();
         ToStringVisitor pv = new ToStringVisitor();
         ast.visit(pv, " ");
@@ -464,7 +464,7 @@ public class TestSimpleParser
     {
         String input = "prog Test1 m = a --!b; gorp";
         TokenStream stream = getInitializedTokenStream(input);
-        SimpleParser parser = new SimpleParser(stream);
+        Parser parser = new Parser(stream);
         AST ast = parser.parse();
         ToStringVisitor pv = new ToStringVisitor();
         ast.visit(pv, " ");
@@ -477,7 +477,7 @@ public class TestSimpleParser
     {
         String input = "prog Test1 m = a -(-!b) | !-(b); gorp";
         TokenStream stream = getInitializedTokenStream(input);
-        SimpleParser parser = new SimpleParser(stream);
+        Parser parser = new Parser(stream);
         AST ast = parser.parse();
         ToStringVisitor pv = new ToStringVisitor();
         ast.visit(pv, " ");
@@ -490,7 +490,7 @@ public class TestSimpleParser
     {
         String input = "prog Test1 print s + 5 + true + \"s\"; gorp";
         TokenStream stream = getInitializedTokenStream(input);
-        SimpleParser parser = new SimpleParser(stream);
+        Parser parser = new Parser(stream);
         AST ast = parser.parse();
         ToStringVisitor pv = new ToStringVisitor();
         ast.visit(pv, " ");
@@ -503,7 +503,7 @@ public class TestSimpleParser
     {
         String input = "prog Test1 println s + 5 + true + \"s\"; gorp";
         TokenStream stream = getInitializedTokenStream(input);
-        SimpleParser parser = new SimpleParser(stream);
+        Parser parser = new Parser(stream);
         AST ast = parser.parse();
         ToStringVisitor pv = new ToStringVisitor();
         ast.visit(pv, " ");
@@ -516,7 +516,7 @@ public class TestSimpleParser
     {
         String input = "prog Test1 do (2 + 5) map [int, int] m; od; gorp";
         TokenStream stream = getInitializedTokenStream(input);
-        SimpleParser parser = new SimpleParser(stream);
+        Parser parser = new Parser(stream);
         AST ast = parser.parse();
         ToStringVisitor pv = new ToStringVisitor();
         ast.visit(pv, " ");
@@ -529,7 +529,7 @@ public class TestSimpleParser
     {
         String input = "prog Test1 do (2 + 5) aa = ab; od; gorp";
         TokenStream stream = getInitializedTokenStream(input);
-        SimpleParser parser = new SimpleParser(stream);
+        Parser parser = new Parser(stream);
         AST ast = parser.parse();
         ToStringVisitor pv = new ToStringVisitor();
         ast.visit(pv, " ");
@@ -542,7 +542,7 @@ public class TestSimpleParser
     {
         String input = "prog Test1 do (a + b - c * d / e | \"a\" < true > false >= x <= y - -a != k & f) ; od; gorp";
         TokenStream stream = getInitializedTokenStream(input);
-        SimpleParser parser = new SimpleParser(stream);
+        Parser parser = new Parser(stream);
         AST ast = parser.parse();
         ToStringVisitor pv = new ToStringVisitor();
         ast.visit(pv, " ");
@@ -555,7 +555,7 @@ public class TestSimpleParser
     {
         String input = "prog Test1 do (a + b - c * d / e | \"a\" < true > false >= x <= y - -a != k & f) int x; string y; boolean z; map[int, map[int, map[int, string]]] m1; od; gorp";
         TokenStream stream = getInitializedTokenStream(input);
-        SimpleParser parser = new SimpleParser(stream);
+        Parser parser = new Parser(stream);
         AST ast = parser.parse();
         ToStringVisitor pv = new ToStringVisitor();
         ast.visit(pv, " ");
@@ -568,7 +568,7 @@ public class TestSimpleParser
     {
         String input = "prog Test1 do (a + b - c * d / e | \"a\" < true > false >= x <= y - -a != k & f) int x; string y; boolean z; map[int, map[int, map[int, string]]] m1; ab = sc; od; gorp";
         TokenStream stream = getInitializedTokenStream(input);
-        SimpleParser parser = new SimpleParser(stream);
+        Parser parser = new Parser(stream);
         AST ast = parser.parse();
         ToStringVisitor pv = new ToStringVisitor();
         ast.visit(pv, " ");
@@ -581,7 +581,7 @@ public class TestSimpleParser
     {
         String input = "prog Test1 do x : [x1 , x2] ;  od; gorp";
         TokenStream stream = getInitializedTokenStream(input);
-        SimpleParser parser = new SimpleParser(stream);
+        Parser parser = new Parser(stream);
         AST ast = parser.parse();
         ToStringVisitor pv = new ToStringVisitor();
         ast.visit(pv, " ");
@@ -594,7 +594,7 @@ public class TestSimpleParser
     {
         String input = "prog Test1 int x; boolean y; map[int, map[boolean, map[string, int]]] m1; do x : [x1 , x2] println x1;  od; gorp";
         TokenStream stream = getInitializedTokenStream(input);
-        SimpleParser parser = new SimpleParser(stream);
+        Parser parser = new Parser(stream);
         AST ast = parser.parse();
         ToStringVisitor pv = new ToStringVisitor();
         ast.visit(pv, " ");
@@ -607,7 +607,7 @@ public class TestSimpleParser
     {
         String input = "prog Test1 int x; boolean y; map[int, map[boolean, map[string, int]]] m1; do (a + b - c * d / e | \"a\" < true > false >= x <= y - -a != k & f) int x; string y; boolean z; map[int, map[int, map[int, string]]] m1; ab = sc; od; gorp";
         TokenStream stream = getInitializedTokenStream(input);
-        SimpleParser parser = new SimpleParser(stream);
+        Parser parser = new Parser(stream);
         AST ast = parser.parse();
         ToStringVisitor pv = new ToStringVisitor();
         ast.visit(pv, " ");
@@ -620,7 +620,7 @@ public class TestSimpleParser
     {
         String input = "prog Test1 map[map[string,boolean],int] m; gorp";
         TokenStream stream = getInitializedTokenStream(input);
-        SimpleParser parser = new SimpleParser(stream);
+        Parser parser = new Parser(stream);
         AST ast = parser.parse();
         ToStringVisitor pv = new ToStringVisitor();
         ast.visit(pv, " ");
@@ -633,7 +633,7 @@ public class TestSimpleParser
     {
         String input = "prog Test1 m = x + 4 - 5; gorp";
         TokenStream stream = getInitializedTokenStream(input);
-        SimpleParser parser = new SimpleParser(stream);
+        Parser parser = new Parser(stream);
         AST ast = parser.parse();
         ToStringVisitor pv = new ToStringVisitor();
         ast.visit(pv, " ");
@@ -646,7 +646,7 @@ public class TestSimpleParser
     {
         String input = "prog Test1 m = 1 + 4 - 5; gorp";
         TokenStream stream = getInitializedTokenStream(input);
-        SimpleParser parser = new SimpleParser(stream);
+        Parser parser = new Parser(stream);
         AST ast = parser.parse();
         ToStringVisitor pv = new ToStringVisitor();
         ast.visit(pv, " ");
@@ -659,7 +659,7 @@ public class TestSimpleParser
     {
         String input = "prog Test1 m = 1 / 4 * 5; gorp";
         TokenStream stream = getInitializedTokenStream(input);
-        SimpleParser parser = new SimpleParser(stream);
+        Parser parser = new Parser(stream);
         AST ast = parser.parse();
         ToStringVisitor pv = new ToStringVisitor();
         ast.visit(pv, " ");
@@ -672,7 +672,7 @@ public class TestSimpleParser
     {
         String input = "prog Test1 m = true / false * \"strliteral\"; gorp";
         TokenStream stream = getInitializedTokenStream(input);
-        SimpleParser parser = new SimpleParser(stream);
+        Parser parser = new Parser(stream);
         AST ast = parser.parse();
         ToStringVisitor pv = new ToStringVisitor();
         ast.visit(pv, " ");
@@ -685,7 +685,7 @@ public class TestSimpleParser
     {
         String input = "prog Test1 m = 5 + 3 - true + false - \"strliteral\" | true & false != 5 ; gorp";
         TokenStream stream = getInitializedTokenStream(input);
-        SimpleParser parser = new SimpleParser(stream);
+        Parser parser = new Parser(stream);
         AST ast = parser.parse();
         ToStringVisitor pv = new ToStringVisitor();
         ast.visit(pv, " ");
@@ -698,7 +698,7 @@ public class TestSimpleParser
     {
         String input = "prog Test1 m[5+4] = l; gorp";
         TokenStream stream = getInitializedTokenStream(input);
-        SimpleParser parser = new SimpleParser(stream);
+        Parser parser = new Parser(stream);
         AST ast = parser.parse();
         ToStringVisitor pv = new ToStringVisitor();
         ast.visit(pv, " ");
@@ -711,7 +711,7 @@ public class TestSimpleParser
     {
         String input = "prog Test1 m = 4 < 5; gorp";
         TokenStream stream = getInitializedTokenStream(input);
-        SimpleParser parser = new SimpleParser(stream);
+        Parser parser = new Parser(stream);
         AST ast = parser.parse();
         ToStringVisitor pv = new ToStringVisitor();
         ast.visit(pv, " ");
@@ -724,7 +724,7 @@ public class TestSimpleParser
     {
         String input = "prog Test1 m[4 +5 * 6 - 7] = 4 < 5; gorp";
         TokenStream stream = getInitializedTokenStream(input);
-        SimpleParser parser = new SimpleParser(stream);
+        Parser parser = new Parser(stream);
         AST ast = parser.parse();
         ToStringVisitor pv = new ToStringVisitor();
         ast.visit(pv, " ");
@@ -737,7 +737,7 @@ public class TestSimpleParser
     {
         String input = "prog Test1 m[11] = 4 < 5; gorp";
         TokenStream stream = getInitializedTokenStream(input);
-        SimpleParser parser = new SimpleParser(stream);
+        Parser parser = new Parser(stream);
         AST ast = parser.parse();
         ToStringVisitor pv = new ToStringVisitor();
         ast.visit(pv, " ");
@@ -750,7 +750,7 @@ public class TestSimpleParser
     {
         String input = "prog Test1 m[11 | 1 & 5 < 6 >= 1 != 19] = 4 < 5; gorp";
         TokenStream stream = getInitializedTokenStream(input);
-        SimpleParser parser = new SimpleParser(stream);
+        Parser parser = new Parser(stream);
         AST ast = parser.parse();
         ToStringVisitor pv = new ToStringVisitor();
         ast.visit(pv, " ");
@@ -763,7 +763,7 @@ public class TestSimpleParser
     {
         String input = "prog Test1 m[true | false & \"qs\" < m >= q != 19] = b4 < s5; gorp";
         TokenStream stream = getInitializedTokenStream(input);
-        SimpleParser parser = new SimpleParser(stream);
+        Parser parser = new Parser(stream);
         AST ast = parser.parse();
         ToStringVisitor pv = new ToStringVisitor();
         ast.visit(pv, " ");
@@ -776,7 +776,7 @@ public class TestSimpleParser
     {
         String input = "prog Test1 m[true | false & \"qs\" < m >= q != 19] = b4[11 <= 2] * s5[a]; gorp";
         TokenStream stream = getInitializedTokenStream(input);
-        SimpleParser parser = new SimpleParser(stream);
+        Parser parser = new Parser(stream);
         AST ast = parser.parse();
         ToStringVisitor pv = new ToStringVisitor();
         ast.visit(pv, " ");

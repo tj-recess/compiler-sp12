@@ -141,6 +141,7 @@ public class ContextCheckVisitor implements ASTVisitor
     public Object visitPrintCommand(PrintCommand printCommand, Object arg)
             throws Exception
     {
+        printCommand.expression.visit(this, arg);
         return null;
     }
 
@@ -148,6 +149,7 @@ public class ContextCheckVisitor implements ASTVisitor
     public Object visitPrintlnCommand(PrintlnCommand printlnCommand, Object arg)
             throws Exception
     {
+        printlnCommand.expression.visit(this, arg);
         return null;
     }
 
@@ -233,8 +235,8 @@ public class ContextCheckVisitor implements ASTVisitor
             throws Exception
     {
         Declaration dec = this.symbolTable.lookup(simpleLValue.identifier.getText());
-        check(dec != null, simpleLValue, "Either Identifier's declaration is not present in" +
-        		" symbol table OR type of simpleLValue is not same as type of declaration");
+        check(dec != null, simpleLValue, "Declaration of identifier '" + simpleLValue.identifier.getText() + 
+                "' is not present in symbol table");
         return dec.type;
     }
 
@@ -342,9 +344,20 @@ public class ContextCheckVisitor implements ASTVisitor
         Type unaryOpType = (Type)unaryOpExpression.expression.visit(this, arg);
         check(unaryOpType instanceof SimpleType, unaryOpExpression.expression, "unaryOpType is not a simple type");
         SimpleType s = (SimpleType)unaryOpType;
-        check((s.type.equals(Kind.INT) && unaryOpExpression.op.equals(Kind.MINUS))
-                || (s.type.equals(Kind.BOOLEAN) && unaryOpExpression.op.equals(Kind.BOOLEAN)),
-                unaryOpExpression, "operator is not compatible with type (- with Int or ! with boolean");
+        if(unaryOpExpression.op.equals(Kind.MINUS))
+        {
+            check((s.type.equals(Kind.INT))
+                    ,unaryOpExpression, "Unary operator '-' cannot be applied on type " + s.type);
+        }
+        else if(unaryOpExpression.op.equals(Kind.NOT))
+        {
+            check((s.type.equals(Kind.BOOLEAN)),
+                    unaryOpExpression, "Unary operator '!' cannot be applied on type " + s.type);   
+        }
+        else
+        {
+            check(false, unaryOpExpression, "Unary operator can only be of type '-' or '!'");
+        }
         return unaryOpType;
     }
 
@@ -396,7 +409,7 @@ argument type
         }
         else
         {
-            check(bothTypesAreSame, binaryOpExpression, "Operator is not '+' AND both types are not same");
+            check(bothTypesAreSame, binaryOpExpression, "Both types must be same for operator " + binaryOpExpression.op);
             Kind op = binaryOpExpression.op;
             if(op.equals(Kind.EQUALS) || op.equals(Kind.NOT_EQUALS) || op.equals(Kind.LESS_THAN)
                     || op.equals(Kind.GREATER_THAN) || op.equals(Kind.AT_LEAST) || op.equals(Kind.AT_MOST))

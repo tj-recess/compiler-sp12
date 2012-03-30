@@ -256,7 +256,7 @@ public class TestSimpleParser
     @Test
     public void Test16() throws Exception
     {
-        String input = "prog Test1 do println : [x1 , x2] println x1;  od; gorp";
+        String input = "prog Test1 do x : [x1 , x2] println x1;  od; gorp";
         TokenStream stream = getInitializedTokenStream(input);
         Parser parser = new Parser(stream);
         AST ast = parser.parse();
@@ -615,7 +615,7 @@ public class TestSimpleParser
         System.out.println(st);
     }
 
-    @Test
+    @Test(expected=SyntaxException.class)
     public void xtestMapDec6() throws Exception
     {
         String input = "prog Test1 map[map[string,boolean],int] m; gorp";

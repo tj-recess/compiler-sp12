@@ -6,7 +6,7 @@ import edu.ufl.cise.cop5555.sp12.TokenStream.Token;
 public class SyntaxException extends Exception
 {
 
-    Token t;
+    public Token t;
 
     public SyntaxException(Token t, String msg)
     {

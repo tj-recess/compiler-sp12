@@ -297,7 +297,9 @@ public class ContextCheckVisitor implements ASTVisitor
     @Override
     public Object visitLValueExpression(LValueExpression lValueExpression, Object arg) throws Exception
     {
-        return lValueExpression.lValue.visit(this, arg);
+        Type type = (Type)lValueExpression.lValue.visit(this, arg);
+        lValueExpression.expressionType = type;
+        return type;
     }
 
     @Override
@@ -307,7 +309,8 @@ public class ContextCheckVisitor implements ASTVisitor
     {
         check(integerLiteralExpression.integerLiteral.kind.equals(Kind.INTEGER_LITERAL), integerLiteralExpression,
         "Type of integerLiteral is not equal to Int");
-        return new SimpleType(Kind.INT);
+        integerLiteralExpression.expressionType = new SimpleType(Kind.INT);
+        return integerLiteralExpression.expressionType;
     }
 
     @Override
@@ -317,7 +320,8 @@ public class ContextCheckVisitor implements ASTVisitor
     {
         check(booleanLiteralExpression.booleanLiteral.kind.equals(Kind.BOOLEAN_LITERAL), booleanLiteralExpression,
         "Type of booleanLiteral is not equal to Boolean");
-        return new SimpleType(Kind.BOOLEAN);
+        booleanLiteralExpression.expressionType = new SimpleType(Kind.BOOLEAN);
+        return booleanLiteralExpression.expressionType;
     }
 
     @Override
@@ -327,7 +331,8 @@ public class ContextCheckVisitor implements ASTVisitor
     {
         check(stringLiteralExpression.stringLiteral.kind.equals(Kind.STRING_LITERAL), stringLiteralExpression,
                 "Type of stringLiteral is not equal to String");
-        return new SimpleType(Kind.STRING);
+        stringLiteralExpression.expressionType = new SimpleType(Kind.STRING);
+        return stringLiteralExpression.expressionType;
     }
 
     /**
@@ -358,6 +363,7 @@ public class ContextCheckVisitor implements ASTVisitor
         {
             check(false, unaryOpExpression, "Unary operator can only be of type '-' or '!'");
         }
+        unaryOpExpression.expressionType = unaryOpExpression.expression.expressionType;
         return unaryOpType;
     }
 
@@ -440,6 +446,7 @@ argument type
                 check(false, binaryOpExpression, "Something went terribly wrong - programming logic error");
             }
         }
+        binaryOpExpression.expressionType = resultType;
         return resultType;
     }
 

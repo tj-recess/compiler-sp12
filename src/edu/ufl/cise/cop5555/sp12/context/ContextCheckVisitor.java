@@ -68,6 +68,7 @@ public class ContextCheckVisitor implements ASTVisitor
         check(!declaration.ident.equals(this.programName), declaration, "Identifier name is same as program name");
         check(this.symbolTable.insert(declaration.ident.getText(), declaration), declaration,
                 "Duplicate declaration in scope");
+        declaration.setScopeNum(this.symbolTable.getCurrentScope());
         return null;
     }
 
@@ -235,6 +236,8 @@ public class ContextCheckVisitor implements ASTVisitor
             throws Exception
     {
         Declaration dec = this.symbolTable.lookup(simpleLValue.identifier.getText());
+        int scope = dec.ident.getScope();
+        simpleLValue.identifier.setScope(scope);
         check(dec != null, simpleLValue, "Declaration of identifier '" + simpleLValue.identifier.getText() + 
                 "' is not present in symbol table");
         return dec.type;

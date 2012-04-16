@@ -110,4 +110,10 @@ public class SymbolTable
 	}
 
 
+    public int getCurrentScope()
+    {
+        return this.scopeStack.peek();
+    }
+
+
 }

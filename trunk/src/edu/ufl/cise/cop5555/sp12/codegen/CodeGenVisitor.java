@@ -123,9 +123,7 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
 			Object arg) throws Exception {
 	    assignExprCommand.expression.visit(this, arg);
 	    Token token = (Token) assignExprCommand.lValue.visit(this, arg);
-//	    mv.visitFieldInsn(PUTSTATIC, className, token.getText(), variableTypeMap.get(token.getText()));
-	    mv.visitFieldInsn(PUTSTATIC, className, token.getText(), 
-	            getTypeString(assignExprCommand.expression.expressionType));
+	    mv.visitFieldInsn(PUTSTATIC, className, token.getText(), getTypeString(assignExprCommand.expression.expressionType));
 		return null;
 	}
 

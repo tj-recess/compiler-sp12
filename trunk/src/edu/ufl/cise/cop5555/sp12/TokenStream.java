@@ -156,6 +156,8 @@ public class TokenStream
         public final Kind kind;
         public final int beg;
         public final int end;
+        
+        private int scope;
 
         public Token(Kind kind, int beg, int end)
         {
@@ -255,7 +257,17 @@ public class TokenStream
             {
                 return "EOF";
             }
+            if(kind == Kind.IDENTIFIER)
+            {
+                return getRawTextForIdent();
+            }
             return getRawText();
+        }
+
+        private String getRawTextForIdent()
+        {
+            String identText = getRawText();
+            return identText + getScope();
         }
 
         public String toString()
@@ -279,6 +291,16 @@ public class TokenStream
                 e.printStackTrace();
                 return false;
             }
+        }
+
+        public void setScope(int scope)
+        {
+            this.scope = scope;
+        }
+
+        public int getScope()
+        {
+            return scope;
         }
     }
 

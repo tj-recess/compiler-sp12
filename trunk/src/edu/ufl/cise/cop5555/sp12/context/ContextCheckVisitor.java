@@ -195,10 +195,12 @@ public class ContextCheckVisitor implements ASTVisitor
         check(lvalueType instanceof CompoundType, doEachCommand, "LvalueType != CompoundType");
         CompoundType lvalueCType = (CompoundType)lvalueType;
         Declaration keyDeclaration = this.symbolTable.lookup(doEachCommand.key.getText());
+        doEachCommand.key.setScope(keyDeclaration.ident.getScope());
         check(lvalueCType.keyType.equals(keyDeclaration.type), doEachCommand, " Identifier0.type != keyType");
         
         //get type of doEachCommand.val from Symbol table
         Declaration valDeclaration = this.symbolTable.lookup(doEachCommand.val.getText());
+        doEachCommand.val.setScope(valDeclaration.ident.getScope());
         check(lvalueCType.valType.equals(valDeclaration.type), doEachCommand, " Identifier1.type != valType");
         doEachCommand.block.visit(this, arg);
         return null;
@@ -238,6 +240,7 @@ public class ContextCheckVisitor implements ASTVisitor
         Declaration dec = this.symbolTable.lookup(simpleLValue.identifier.getText());
         int scope = dec.ident.getScope();
         simpleLValue.identifier.setScope(scope);
+        simpleLValue.expressionType = dec.type;
         check(dec != null, simpleLValue, "Declaration of identifier '" + simpleLValue.identifier.getText() + 
                 "' is not present in symbol table");
         return dec.type;
@@ -269,6 +272,7 @@ public class ContextCheckVisitor implements ASTVisitor
 //        Type exprLvalType = (Type) exprLValue.expression.visit(this, arg);
 //        check(cType.valType.equals(exprLvalType), exprLValue, 
 //                "valType in Identifier's declaration is not same as exprLValue's type");
+        exprLValue.expressionType = dec.type;
         return cType.valType;
     }
 

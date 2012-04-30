@@ -183,6 +183,7 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
         else    //if instanceof ExprLValue
         {
             assignExprCommand.expression.visit(this, nonNull);
+            box(assignExprCommand.expression.expressionType);
             mv.visitMethodInsn(INVOKEVIRTUAL, "java/util/HashMap", "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
             mv.visitInsn(POP);
         }
@@ -411,13 +412,16 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
 			throws Exception {
 	    mv.visitFieldInsn(GETSTATIC, className, exprLValue.identifier.getText(), HASHMAP_SIGNATURE);
 	    exprLValue.expression.visit(this, nonNull);    //pass a nonNull arg to differentiate between SimpleType and CompoundType
+	    box(exprLValue.expression.expressionType);
 	    return exprLValue.identifier;
 	}
 
 	@Override
 	public Object visitPair(Pair pair, Object arg) throws Exception {
 	    pair.expression0.visit(this, arg);
+	    box(pair.expression0.expressionType);
 	    pair.expression1.visit(this, arg);
+	    box(pair.expression1.expressionType);
 	    return null;
 	}
 
@@ -430,8 +434,10 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
 	    {
 	        mv.visitFieldInsn(GETSTATIC, className, tempMapName, HASHMAP_SIGNATURE);
 	        aPair.expression0.visit(this, nonNull);
+	        box(aPair.expression0.expressionType);
 	        aPair.expression1.visit(this, nonNull);
-            mv.visitMethodInsn(INVOKEVIRTUAL, "java/util/HashMap", "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
+	        box(aPair.expression1.expressionType);
+	        mv.visitMethodInsn(INVOKEVIRTUAL, "java/util/HashMap", "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
             mv.visitInsn(POP);
 	    }
 	    //now inovke putAll to transfer everything from temp map to actual one
@@ -449,10 +455,11 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
 	    
 	    if(lValueExpression.lValue instanceof SimpleLValue)
 	    {
-	        mv.visitFieldInsn(GETSTATIC, className, varName, varType);	        
+	        mv.visitFieldInsn(GETSTATIC, className, varName, varType);	 
 	    }
 	    else
 	    {
+//	        box(lValueExpression.expressionType);
 	        mv.visitMethodInsn(INVOKEVIRTUAL, "java/util/HashMap", "get", "(Ljava/lang/Object;)Ljava/lang/Object;");
             unbox(lValueExpression.expressionType);
 	    }
@@ -460,7 +467,17 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
 	    return varType;
 	}
 
-	@Override
+	private void box(Type t)
+    {
+	    if (t.equals(new SimpleType(Kind.INT))) {
+	        mv.visitMethodInsn(INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;");
+        }
+	    else if (t.equals(new SimpleType(Kind.BOOLEAN))) {
+            mv.visitMethodInsn(INVOKESTATIC, "java/lang/Boolean", "valueOf", "(Z)Ljava/lang/Boolean;");
+        }
+    }
+
+    @Override
 	public Object visitIntegerLiteralExpression(
 			IntegerLiteralExpression integerLiteralExpression, Object arg)
 			throws Exception {
@@ -469,7 +486,7 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
 		mv.visitLdcInsn(integerLiteralExpression.integerLiteral.getIntVal());
 		if(arg != null)
 		{
-		    mv.visitMethodInsn(INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;");
+//		    mv.visitMethodInsn(INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;");
 		}
 		return "I";
 	}
@@ -489,7 +506,7 @@ public class CodeGenVisitor implements ASTVisitor, Opcodes {
 	    }
         if(arg != null)
         {
-            mv.visitMethodInsn(INVOKESTATIC, "java/lang/Boolean", "valueOf", "(Z)Ljava/lang/Boolean;");
+//            mv.visitMethodInsn(INVOKESTATIC, "java/lang/Boolean", "valueOf", "(Z)Ljava/lang/Boolean;");
         }
 	    return "Z";
 	}
